@@ -96,15 +96,34 @@ hayCaminoIluminado = foldCircuito cCaja cSerie cParalelo
 
 -- 5: cantidadPrendidas
 
-cantidadPrendidas = undefined -- TODO: COMPLETAR
+cantidadPrendidas :: Circuito -> Int
+cantidadPrendidas = foldCircuito cCaja cSerie cParalelo
+  where
+    cCaja (Bombilla True) = 1
+    cCaja _               = 0
+    cSerie resultadoInicial resultadoFinal = resultadoInicial + resultadoFinal
+    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
+      cCaja cajaEntrada + resultadoIzquierdo + resultadoDerecho + cCaja cajaSalida
 
 -- 6: cajasDeCircuito
 
-cajasDeCircuito = undefined -- TODO: COMPLETAR
+cajasDeCircuito :: Circuito -> [Caja]
+cajasDeCircuito = foldCircuito cCaja cSerie cParalelo
+  where
+    cCaja c = [c]
+    cSerie resultadoInicial resultadoFinal = resultadoInicial ++ resultadoFinal
+    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
+      [cajaEntrada] ++ resultadoIzquierdo ++ resultadoDerecho ++ [cajaSalida]
 
 -- 7: esCircuitoProlijo
 
-esCircuitoProlijo = undefined -- TODO: COMPLETAR
+esCircuitoProlijo :: Circuito -> Bool
+esCircuitoProlijo = recCircuito cCaja cSerie cParalelo
+  where
+    cCaja _ = True
+    cSerie _ _ (Serie _ _) _ = False
+    cSerie _ resultadoInicial _ resultadoFinal = resultadoInicial && resultadoFinal
+    cParalelo _ _ resultadoIzquierdo _ resultadoDerecho _ = resultadoIzquierdo && resultadoDerecho
 
 -- 8: circuitoEmprolijado
 
