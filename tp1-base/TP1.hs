@@ -85,7 +85,14 @@ invertido = foldCircuito cajaInvertida serieInvertida paraleloInvertido
 
 -- 4: hayCaminoIluminado
 
-hayCaminoIluminado = undefined -- TODO: COMPLETAR
+hayCaminoIluminado :: Circuito -> Bool
+hayCaminoIluminado = foldCircuito cCaja cSerie cParalelo
+  where
+    cCaja (Bombilla True) = True
+    cCaja _               = False
+    cSerie resultadoInicial resultadoFinal = resultadoInicial && resultadoFinal
+    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
+      cCaja cajaEntrada && (resultadoIzquierdo || resultadoDerecho) && cCaja cajaSalida
 
 -- 5: cantidadPrendidas
 
