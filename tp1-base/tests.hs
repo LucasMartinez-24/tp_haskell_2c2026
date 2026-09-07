@@ -17,10 +17,34 @@ testsInvertido = TestList -- TODO: AGREGAR
   ]
 
 testsHayCaminoIluminado :: Test
-testsHayCaminoIluminado = TestList -- TODO: AGREGAR
-  [ "En una caja con bombilla encendida hay camino iluminado"
+testsHayCaminoIluminado = TestList
+  [ "Caja encendida tiene camino iluminado"
     ~: hayCaminoIluminado cajaOn
     ~?= True
+  , "Caja apagada no tiene camino iluminado"
+    ~: hayCaminoIluminado cajaOff
+    ~?= False
+  , "Caja Nada no tiene camino iluminado"
+    ~: hayCaminoIluminado cajaNada
+    ~?= False
+  , "Serie de dos encendidas tiene camino iluminado"
+    ~: hayCaminoIluminado (Serie cajaOn cajaOn)
+    ~?= True
+  , "Serie donde alguna esta apagada no tiene camino iluminado"
+    ~: hayCaminoIluminado (Serie cajaOn cajaOff)
+    ~?= False
+  , "Paralelo con entrada/salida encendidas y al menos un ramal iluminado"
+    ~: hayCaminoIluminado (Paralelo on cajaOn cajaOff on)
+    ~?= True
+  , "Paralelo con entrada apagada no tiene camino iluminado"
+    ~: hayCaminoIluminado (Paralelo off cajaOn cajaOn on)
+    ~?= False
+  , "Paralelo con salida apagada no tiene camino iluminado"
+    ~: hayCaminoIluminado (Paralelo on cajaOn cajaOn off)
+    ~?= False
+  , "Paralelo con ambos ramales apagados no tiene camino iluminado"
+    ~: hayCaminoIluminado (Paralelo on cajaOff cajaOff on)
+    ~?= False
   ]
 
 testsCantidadPrendidas :: Test
