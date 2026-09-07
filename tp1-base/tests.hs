@@ -4,7 +4,7 @@ import TP1
 -- TESTS
 
 testsInvertido :: Test
-testsInvertido = TestList -- TODO: AGREGAR
+testsInvertido = TestList
   [ "Caja invertida (1)"
     ~: invertido cajaOn
     ~?= cajaOn
@@ -14,6 +14,21 @@ testsInvertido = TestList -- TODO: AGREGAR
   , "Caja invertida (3)"
     ~: invertido cajaNada
     ~?= cajaNada
+  , "Serie invertida cambia el orden de sus dos partes"
+    ~: invertido (Serie cajaOn cajaOff)
+    ~?= Serie cajaOff cajaOn
+  , "Serie anidada invertida invierte recursivamente y cambia el orden"
+    ~: invertido (Serie (Serie cajaOn cajaOff) cajaNada)
+    ~?= Serie cajaNada (Serie cajaOff cajaOn)
+  , "Paralelo invertido intercambia entrada/salida y ramales"
+    ~: invertido (Paralelo on cajaOn cajaOff off)
+    ~?= Paralelo off cajaOff cajaOn on
+  , "Paralelo invertido invierte recursivamente los ramales"
+    ~: invertido (Paralelo on (Serie cajaOn cajaOff) cajaNada off)
+    ~?= Paralelo off cajaNada (Serie cajaOff cajaOn) on
+  , "Invertir dos veces devuelve el circuito original"
+    ~: invertido (invertido (Paralelo on (Serie cajaOn cajaOff) cajaNada off))
+    ~?= Paralelo on (Serie cajaOn cajaOff) cajaNada off
   ]
 
 testsHayCaminoIluminado :: Test
@@ -123,22 +138,40 @@ testsEsCircuitoProlijo = TestList
   -- "show = showDeCircuitoConEstructura".
   -- De esa forma, podrán distinguir la estructura de los circuitos en serie.
 testsCircuitoEmprolijado :: Test
-testsCircuitoEmprolijado = TestList -- TODO: AGREGAR
+testsCircuitoEmprolijado = TestList
   [ "La versión emprolijada de una caja es la misma caja"
     ~: circuitoEmprolijado cajaOn
     ~?= cajaOn
+  , "Un circuito ya prolijo queda igual"
+    ~: circuitoEmprolijado (Serie (Serie cajaOn cajaOff) cajaOn)
+    ~?= Serie (Serie cajaOn cajaOff) cajaOn
+  , "Un circuito no prolijo se corrige asociando a la izquierda"
+    ~: circuitoEmprolijado (Serie cajaOn (Serie cajaOff cajaOn))
+    ~?= Serie (Serie cajaOn cajaOff) cajaOn
+  , "Una serie con series en ambas partes se emprolija por completo"
+    ~: circuitoEmprolijado (Serie (Serie cajaOn cajaNada) (Serie cajaOff cajaOn))
+    ~?= Serie (Serie (Serie cajaOn cajaNada) cajaOff) cajaOn
+  , "Un paralelo con subcircuitos ya prolijos queda igual"
+    ~: circuitoEmprolijado (Paralelo on (Serie cajaOn cajaOff) cajaOn off)
+    ~?= Paralelo on (Serie cajaOn cajaOff) cajaOn off
+  , "Un paralelo con un subcircuito no prolijo se emprolija por dentro"
+    ~: circuitoEmprolijado (Paralelo on (Serie cajaOn (Serie cajaOff cajaOn)) cajaOff off)
+    ~?= Paralelo on (Serie (Serie cajaOn cajaOff) cajaOn) cajaOff off
+  , "Una serie que contiene un paralelo no prolijo emprolija el paralelo sin afectar la serie externa"
+    ~: circuitoEmprolijado (Serie (Paralelo on (Serie cajaOn (Serie cajaOff cajaOn)) cajaOff off) cajaOn)
+    ~?= Serie (Paralelo on (Serie (Serie cajaOn cajaOff) cajaOn) cajaOff off) cajaOn
   ]
 
 testsTienenLaMismaEstructura :: Test
 testsTienenLaMismaEstructura = TestList -- TODO: AGREGAR
   [
-    
+
   ]
 
 testsSubCircuitoMásResistente :: Test
 testsSubCircuitoMásResistente = TestList -- TODO: AGREGAR
   [
-    
+
   ]
 
 tests :: Test

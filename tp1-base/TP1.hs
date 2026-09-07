@@ -127,7 +127,16 @@ esCircuitoProlijo = recCircuito cCaja cSerie cParalelo
 
 -- 8: circuitoEmprolijado
 
-circuitoEmprolijado = undefined -- TODO: COMPLETAR
+circuitoEmprolijado :: Circuito -> Circuito
+circuitoEmprolijado = foldCircuito cCaja cSerie cParalelo
+  where
+    cCaja caja = Caja caja
+    cSerie resultadoInicial resultadoFinal = serieRotada resultadoInicial resultadoFinal
+    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
+      Paralelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida
+    serieRotada circuitoInicial (Serie circuitoIzquierdo circuitoDerecho) =
+      serieRotada (serieRotada circuitoInicial circuitoIzquierdo) circuitoDerecho
+    serieRotada circuitoInicial circuitoFinal = Serie circuitoInicial circuitoFinal
 
 -- 9: tienenLaMismaEstructura
 
