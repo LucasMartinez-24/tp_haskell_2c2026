@@ -131,10 +131,23 @@ circuitoEmprolijado = undefined -- TODO: COMPLETAR
 
 -- 9: tienenLaMismaEstructura
 
-tienenLaMismaEstructura = undefined -- TODO: COMPLETAR
+tienenLaMismaEstructura :: Circuito -> Circuito -> Bool
+tienenLaMismaEstructura = foldCircuito cCaja cSerie cParalelo
+  where 
+    cCaja _ circuito2 = case circuito2 of
+        Caja _ -> True
+        _      -> False
+    cSerie resultadoInicial resultadoFinal circuito2 = case circuito2 of
+        Serie circuitoInicial2 circuitoFinal2 -> resultadoInicial circuitoInicial2 && resultadoFinal circuitoFinal2
+        _                                      -> False
+    cParalelo _ resultadoIzquierdo resultadoDerecho _ circuito2 = case circuito2 of
+        Paralelo _ circuitoIzquierdo2 circuitoDerecho2 _ -> resultadoIzquierdo circuitoIzquierdo2 && resultadoDerecho
+         circuitoDerecho2
+        _                                               -> False
 
 -- 10: subCircuitoMásResistente
 
+subCircuitoMásResistente :: Circuito -> Circuito
 subCircuitoMásResistente = undefined -- TODO: COMPLETAR
 
 {-- 11: Demostrar: alternado . alternado = id

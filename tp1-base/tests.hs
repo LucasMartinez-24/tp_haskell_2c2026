@@ -130,9 +130,42 @@ testsCircuitoEmprolijado = TestList -- TODO: AGREGAR
   ]
 
 testsTienenLaMismaEstructura :: Test
-testsTienenLaMismaEstructura = TestList -- TODO: AGREGAR
-  [
-    
+testsTienenLaMismaEstructura = TestList 
+  [ "Dos cajas de distinto tipo tienen la misma estructura"
+    ~: tienenLaMismaEstructura (cajaOn) (cajaOff)
+    ~?= True
+  , "Dos series con la misma estructura tienen la misma estructura"
+    ~: tienenLaMismaEstructura (Serie cajaOn cajaOff) (Serie cajaNada cajaOff)
+    ~?= True
+  , "Dos palalelos con la misma estructura tienen la misma estructura"
+    ~: tienenLaMismaEstructura (Paralelo on cajaOn cajaOff off) (Paralelo off cajaNada cajaNada on)
+    ~?= True
+  , "Una serie y una caja no tienen la misma estructura"
+    ~: tienenLaMismaEstructura (Serie cajaOn cajaNada) (cajaOn)
+    ~?= False
+  , "Un paralelo y una caja no tienen la misma estructura"
+    ~: tienenLaMismaEstructura (Paralelo off cajaOff cajaOff off) (cajaOff)
+    ~?= False
+  , "Una serie y un paralelo no tienen la misma estructura"
+    ~: tienenLaMismaEstructura 
+    (Serie cajaOn cajaOff) 
+    (Paralelo on cajaNada cajaNada off)
+    ~?= False
+  , "Dos series con distinta estructura no tienen la misma estructura"
+    ~: tienenLaMismaEstructura 
+    (Serie cajaOn (Serie cajaOff cajaNada)) 
+    (Serie (Serie cajaNada cajaOn) cajaOff)
+    ~?= False
+  , "Dos paralelos con distinta estructura no tienen la misma estructura"
+    ~: tienenLaMismaEstructura 
+    (Paralelo on  (Paralelo off cajaOff cajaOff off) cajaOff off) 
+    (Paralelo off cajaNada (Paralelo on cajaNada cajaNada on) on)
+    ~?= False
+  , "Dos circuitos complejos con la misma estructura tienen la misma estructura"
+    ~: tienenLaMismaEstructura 
+    (Serie (Paralelo on  (Serie (Serie cajaOn  cajaOff)     cajaOn) cajaOff off) cajaOn) 
+    (Serie (Paralelo off (Serie (Serie cajaOff cajaNada) cajaNada) cajaOff  on) cajaNada)
+    ~?= True
   ]
 
 testsSubCircuitoMásResistente :: Test
