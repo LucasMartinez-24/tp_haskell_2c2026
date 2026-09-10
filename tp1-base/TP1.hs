@@ -130,11 +130,37 @@ circuitoEmprolijado = foldCircuito cCaja cSerie cParalelo
 
 -- 9: tienenLaMismaEstructura
 
-tienenLaMismaEstructura = undefined -- TODO: COMPLETAR
+tienenLaMismaEstructura :: Circuito -> Circuito -> Bool
+tienenLaMismaEstructura = foldCircuito cCaja cSerie cParalelo
+  where 
+    cCaja _ circuito2 = case circuito2 of
+        Caja _ -> True
+        _      -> False
+    cSerie resultadoInicial resultadoFinal circuito2 = case circuito2 of
+        Serie circuitoInicial2 circuitoFinal2 -> resultadoInicial circuitoInicial2 && resultadoFinal circuitoFinal2
+        _                                      -> False
+    cParalelo _ resultadoIzquierdo resultadoDerecho _ circuito2 = case circuito2 of
+        Paralelo _ circuitoIzquierdo2 circuitoDerecho2 _ -> resultadoIzquierdo circuitoIzquierdo2 && resultadoDerecho
+         circuitoDerecho2
+        _                                               -> False
 
 -- 10: subCircuitoMásResistente
 
-subCircuitoMásResistente = undefined -- TODO: COMPLETAR
+resistenciaCircuito :: Circuito -> Float
+resistenciaCircuito = undefined
+
+circuitoMásResistente :: Circuito -> Circuito -> Circuito
+circuitoMásResistente circuito1 circuito2 = if resistenciaCircuito circuito1 >= resistenciaCircuito circuito2 
+  then circuito1 else circuito2
+
+subCircuitoMásResistente :: Circuito -> Circuito
+subCircuitoMásResistente = recCircuito cCaja cSerie cParalelo
+  where
+    cCaja caja = Caja caja
+    cSerie circuitoInicial circuitoFinal resultadoInicial resultadoFinal =
+      circuitoMásResistente (Serie circuitoInicial circuitoFinal) (circuitoMásResistente resultadoInicial resultadoFinal)
+    cParalelo circuitoDerecho circuitoIzquierdo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
+      circuitoMásResistente (Paralelo cajaEntrada circuitoIzquierdo circuitoDerecho cajaSalida) (circuitoMásResistente resultadoIzquierdo resultadoDerecho)
 
 {-- 11: Demostrar: alternado . alternado = id
 
