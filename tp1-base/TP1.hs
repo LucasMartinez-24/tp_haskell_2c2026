@@ -147,8 +147,21 @@ tienenLaMismaEstructura = foldCircuito cCaja cSerie cParalelo
 
 -- 10: subCircuitoMásResistente
 
+resistenciaCircuito :: Circuito -> Float
+resistenciaCircuito = undefined
+
+circuitoMásResistente :: Circuito -> Circuito -> Circuito
+circuitoMásResistente circuito1 circuito2 = if resistenciaCircuito circuito1 >= resistenciaCircuito circuito2 
+  then circuito1 else circuito2
+
 subCircuitoMásResistente :: Circuito -> Circuito
-subCircuitoMásResistente = undefined -- TODO: COMPLETAR
+subCircuitoMásResistente = recCircuito cCaja cSerie cParalelo
+  where
+    cCaja caja = Caja caja
+    cSerie circuitoInicial resultadoInicial circuitoFinal resultadoFinal =
+      circuitoMásResistente (Serie circuitoInicial circuitoFinal) (circuitoMásResistente resultadoInicial resultadoFinal)
+    cParalelo cajaEntrada circuitoIzquierdo resultadoIzquierdo circuitoDerecho resultadoDerecho cajaSalida =
+      circuitoMásResistente (Paralelo cajaEntrada circuitoIzquierdo circuitoDerecho cajaSalida) (circuitoMásResistente resultadoIzquierdo resultadoDerecho)
 
 {-- 11: Demostrar: alternado . alternado = id
 
