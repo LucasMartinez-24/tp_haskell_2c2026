@@ -151,9 +151,8 @@ circuitoMásResistente circuito1 circuito2 = if resistenciaCircuito circuito1 >=
   then circuito1 else circuito2
 
 subCircuitoMásResistente :: Circuito -> Circuito
-subCircuitoMásResistente = recCircuito cCaja cSerie cParalelo
+subCircuitoMásResistente = recCircuito Caja cSerie cParalelo
   where
-    cCaja caja = Caja caja
     cSerie circuitoInicial circuitoFinal resultadoInicial resultadoFinal =
       circuitoMásResistente (Serie circuitoInicial circuitoFinal) (circuitoMásResistente resultadoInicial resultadoFinal)
     cParalelo circuitoDerecho circuitoIzquierdo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
