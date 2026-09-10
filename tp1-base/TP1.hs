@@ -129,17 +129,17 @@ circuitoEmprolijado = foldCircuito Caja cSerie Paralelo
 
 tienenLaMismaEstructura :: Circuito -> Circuito -> Bool
 tienenLaMismaEstructura = foldCircuito cCaja cSerie cParalelo
-  where 
-    cCaja _ circuito2 = case circuito2 of
-        Caja _ -> True
-        _      -> False
-    cSerie resultadoInicial resultadoFinal circuito2 = case circuito2 of
-        Serie circuitoInicial2 circuitoFinal2 -> resultadoInicial circuitoInicial2 && resultadoFinal circuitoFinal2
-        _                                      -> False
-    cParalelo _ resultadoIzquierdo resultadoDerecho _ circuito2 = case circuito2 of
-        Paralelo _ circuitoIzquierdo2 circuitoDerecho2 _ -> resultadoIzquierdo circuitoIzquierdo2 && resultadoDerecho
-         circuitoDerecho2
-        _                                               -> False
+  where
+    cCaja _ (Caja _) = True
+    cCaja _ _        = False
+
+    cSerie resultadoInicial resultadoFinal (Serie circuitoInicial2 circuitoFinal2) =
+      resultadoInicial circuitoInicial2 && resultadoFinal circuitoFinal2
+    cSerie _ _ _ = False
+
+    cParalelo _ resultadoIzquierdo resultadoDerecho _ (Paralelo _ circuitoIzquierdo2 circuitoDerecho2 _) =
+      resultadoIzquierdo circuitoIzquierdo2 && resultadoDerecho circuitoDerecho2
+    cParalelo _ _ _ _ _ = False
 
 -- 10: subCircuitoMásResistente
 
