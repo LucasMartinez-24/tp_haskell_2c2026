@@ -118,12 +118,9 @@ esCircuitoProlijo = recCircuito (const$True) cSerie cParalelo
 -- 8: circuitoEmprolijado
 
 circuitoEmprolijado :: Circuito -> Circuito
-circuitoEmprolijado = foldCircuito cCaja cSerie cParalelo
+circuitoEmprolijado = foldCircuito Caja cSerie Paralelo
   where
-    cCaja caja = Caja caja
     cSerie resultadoInicial resultadoFinal = serieRotada resultadoInicial resultadoFinal
-    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
-      Paralelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida
     serieRotada circuitoInicial (Serie circuitoIzquierdo circuitoDerecho) =
       serieRotada (serieRotada circuitoInicial circuitoIzquierdo) circuitoDerecho
     serieRotada circuitoInicial circuitoFinal = Serie circuitoInicial circuitoFinal
