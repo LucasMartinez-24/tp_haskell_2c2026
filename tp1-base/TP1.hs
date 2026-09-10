@@ -118,12 +118,9 @@ esCircuitoProlijo = recCircuito (const$True) cSerie cParalelo
 -- 8: circuitoEmprolijado
 
 circuitoEmprolijado :: Circuito -> Circuito
-circuitoEmprolijado = foldCircuito cCaja cSerie cParalelo
+circuitoEmprolijado = foldCircuito Caja cSerie Paralelo
   where
-    cCaja caja = Caja caja
     cSerie resultadoInicial resultadoFinal = serieRotada resultadoInicial resultadoFinal
-    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
-      Paralelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida
     serieRotada circuitoInicial (Serie circuitoIzquierdo circuitoDerecho) =
       serieRotada (serieRotada circuitoInicial circuitoIzquierdo) circuitoDerecho
     serieRotada circuitoInicial circuitoFinal = Serie circuitoInicial circuitoFinal
@@ -132,17 +129,17 @@ circuitoEmprolijado = foldCircuito cCaja cSerie cParalelo
 
 tienenLaMismaEstructura :: Circuito -> Circuito -> Bool
 tienenLaMismaEstructura = foldCircuito cCaja cSerie cParalelo
-  where 
-    cCaja _ circuito2 = case circuito2 of
-        Caja _ -> True
-        _      -> False
-    cSerie resultadoInicial resultadoFinal circuito2 = case circuito2 of
-        Serie circuitoInicial2 circuitoFinal2 -> resultadoInicial circuitoInicial2 && resultadoFinal circuitoFinal2
-        _                                      -> False
-    cParalelo _ resultadoIzquierdo resultadoDerecho _ circuito2 = case circuito2 of
-        Paralelo _ circuitoIzquierdo2 circuitoDerecho2 _ -> resultadoIzquierdo circuitoIzquierdo2 && resultadoDerecho
-         circuitoDerecho2
-        _                                               -> False
+  where
+    cCaja _ (Caja _) = True
+    cCaja _ _        = False
+
+    cSerie resultadoInicial resultadoFinal (Serie circuitoInicial2 circuitoFinal2) =
+      resultadoInicial circuitoInicial2 && resultadoFinal circuitoFinal2
+    cSerie _ _ _ = False
+
+    cParalelo _ resultadoIzquierdo resultadoDerecho _ (Paralelo _ circuitoIzquierdo2 circuitoDerecho2 _) =
+      resultadoIzquierdo circuitoIzquierdo2 && resultadoDerecho circuitoDerecho2
+    cParalelo _ _ _ _ _ = False
 
 -- 10: subCircuitoMásResistente
 
@@ -154,9 +151,8 @@ circuitoMásResistente circuito1 circuito2 = if resistenciaCircuito circuito1 >=
   then circuito1 else circuito2
 
 subCircuitoMásResistente :: Circuito -> Circuito
-subCircuitoMásResistente = recCircuito cCaja cSerie cParalelo
+subCircuitoMásResistente = recCircuito Caja cSerie cParalelo
   where
-    cCaja caja = Caja caja
     cSerie circuitoInicial circuitoFinal resultadoInicial resultadoFinal =
       circuitoMásResistente (Serie circuitoInicial circuitoFinal) (circuitoMásResistente resultadoInicial resultadoFinal)
     cParalelo circuitoDerecho circuitoIzquierdo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
