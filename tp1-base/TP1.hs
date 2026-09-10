@@ -49,15 +49,15 @@ cajaNada = Caja Nada
 -- 1: recCircuito
 recCircuito ::
     (Caja -> b) ->
-    (Circuito -> b -> Circuito -> b -> b) ->
-    (Caja -> Circuito -> b -> Circuito -> b -> Caja -> b) ->
+    (Circuito -> Circuito -> b -> b -> b) ->
+    (Circuito -> Circuito -> Caja -> b -> b -> Caja -> b) ->
     Circuito ->
     b
 recCircuito cCaja cSerie cParalelo c =
     case c of
         Caja caja -> cCaja caja
-        Serie circuitoInicial circuitoFinal -> cSerie circuitoInicial (rec circuitoInicial) circuitoFinal (rec circuitoFinal)
-        Paralelo cajaEntrada circuitoIzquierdo circuitoDerecho cajaSalida -> cParalelo cajaEntrada circuitoIzquierdo (rec circuitoIzquierdo) circuitoDerecho (rec circuitoDerecho) cajaSalida
+        Serie circuitoInicial circuitoFinal -> cSerie circuitoInicial circuitoFinal (rec circuitoInicial) (rec circuitoFinal)
+        Paralelo cajaEntrada circuitoIzquierdo circuitoDerecho cajaSalida -> cParalelo circuitoDerecho circuitoIzquierdo cajaEntrada (rec circuitoIzquierdo) (rec circuitoDerecho) cajaSalida
     where
         rec = recCircuito cCaja cSerie cParalelo
 
@@ -69,65 +69,64 @@ foldCircuito ::
     (Caja -> b -> b -> Caja -> b) ->
     Circuito ->
     b
-foldCircuito cCaja cSerie cParalelo =
-    recCircuito
-        cCaja
-        (\_ resultadoInicial _ resultadoFinal -> cSerie resultadoInicial resultadoFinal)
-        (\cajaEntrada _ resultadoIzquierdo _ resultadoDerecho cajaSalida -> cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida)
+foldCircuito cCaja cSerie cParalelo = recCircuito cCaja (const.const$cSerie) (const.const$cParalelo)
 
 -- 3 invertido
 invertido :: Circuito -> Circuito
-invertido = foldCircuito cajaInvertida serieInvertida paraleloInvertido
+invertido = foldCircuito Caja (flip$Serie) paraleloInvertido
     where
-        cajaInvertida caja = Caja caja
-        serieInvertida resultadoInicial resultadoFinal = Serie resultadoFinal resultadoInicial
         paraleloInvertido cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida = Paralelo cajaSalida resultadoDerecho resultadoIzquierdo cajaEntrada
 
 -- 4: hayCaminoIluminado
 
 hayCaminoIluminado :: Circuito -> Bool
-hayCaminoIluminado = foldCircuito cCaja cSerie cParalelo
+hayCaminoIluminado = foldCircuito cCaja (&&) cParalelo
   where
     cCaja (Bombilla True) = True
     cCaja _               = False
-    cSerie resultadoInicial resultadoFinal = resultadoInicial && resultadoFinal
     cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
       cCaja cajaEntrada && (resultadoIzquierdo || resultadoDerecho) && cCaja cajaSalida
 
 -- 5: cantidadPrendidas
 
 cantidadPrendidas :: Circuito -> Int
-cantidadPrendidas = foldCircuito cCaja cSerie cParalelo
+cantidadPrendidas = foldCircuito cCaja (+) cParalelo
   where
     cCaja (Bombilla True) = 1
     cCaja _               = 0
-    cSerie resultadoInicial resultadoFinal = resultadoInicial + resultadoFinal
     cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
       cCaja cajaEntrada + resultadoIzquierdo + resultadoDerecho + cCaja cajaSalida
 
 -- 6: cajasDeCircuito
 
 cajasDeCircuito :: Circuito -> [Caja]
-cajasDeCircuito = foldCircuito cCaja cSerie cParalelo
+cajasDeCircuito = foldCircuito cCaja (++) cParalelo
   where
     cCaja c = [c]
-    cSerie resultadoInicial resultadoFinal = resultadoInicial ++ resultadoFinal
     cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
       [cajaEntrada] ++ resultadoIzquierdo ++ resultadoDerecho ++ [cajaSalida]
 
 -- 7: esCircuitoProlijo
 
 esCircuitoProlijo :: Circuito -> Bool
-esCircuitoProlijo = recCircuito cCaja cSerie cParalelo
+esCircuitoProlijo = recCircuito (const$True) cSerie cParalelo
   where
-    cCaja _ = True
-    cSerie _ _ (Serie _ _) _ = False
-    cSerie _ resultadoInicial _ resultadoFinal = resultadoInicial && resultadoFinal
-    cParalelo _ _ resultadoIzquierdo _ resultadoDerecho _ = resultadoIzquierdo && resultadoDerecho
+    cSerie _ (Serie _ _) _ _ = False
+    cSerie _ _ resultadoInicial resultadoFinal = resultadoInicial && resultadoFinal
+    cParalelo _ _ _ resultadoIzquierdo resultadoDerecho _ = resultadoIzquierdo && resultadoDerecho
 
 -- 8: circuitoEmprolijado
 
-circuitoEmprolijado = undefined -- TODO: COMPLETAR
+circuitoEmprolijado :: Circuito -> Circuito
+circuitoEmprolijado = foldCircuito cCaja cSerie cParalelo
+  where
+    cCaja caja = Caja caja
+    cSerie resultadoInicial resultadoFinal = serieRotada resultadoInicial resultadoFinal
+    cParalelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
+      Paralelo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida
+    serieRotada circuitoInicial (Serie circuitoIzquierdo circuitoDerecho) =
+      serieRotada (serieRotada circuitoInicial circuitoIzquierdo) circuitoDerecho
+    serieRotada circuitoInicial circuitoFinal = Serie circuitoInicial circuitoFinal
 
 -- 9: tienenLaMismaEstructura
 
@@ -158,9 +157,9 @@ subCircuitoMásResistente :: Circuito -> Circuito
 subCircuitoMásResistente = recCircuito cCaja cSerie cParalelo
   where
     cCaja caja = Caja caja
-    cSerie circuitoInicial resultadoInicial circuitoFinal resultadoFinal =
+    cSerie circuitoInicial circuitoFinal resultadoInicial resultadoFinal =
       circuitoMásResistente (Serie circuitoInicial circuitoFinal) (circuitoMásResistente resultadoInicial resultadoFinal)
-    cParalelo cajaEntrada circuitoIzquierdo resultadoIzquierdo circuitoDerecho resultadoDerecho cajaSalida =
+    cParalelo circuitoDerecho circuitoIzquierdo cajaEntrada resultadoIzquierdo resultadoDerecho cajaSalida =
       circuitoMásResistente (Paralelo cajaEntrada circuitoIzquierdo circuitoDerecho cajaSalida) (circuitoMásResistente resultadoIzquierdo resultadoDerecho)
 
 {-- 11: Demostrar: alternado . alternado = id
